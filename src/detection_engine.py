@@ -1,5 +1,5 @@
 from detectors.brute_force import BruteForceDetector
-
+from detectors.password_spraying import PasswordSprayDetector
 
 class DetectionEngine:
 
@@ -7,7 +7,8 @@ class DetectionEngine:
 
         self.detectors = [
 
-            BruteForceDetector()
+            BruteForceDetector(),
+            PasswordSprayDetector()
 
         ]
 
