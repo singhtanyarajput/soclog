@@ -1,14 +1,14 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
-
-class BruteForceDetector:
+from detectors.base_detectors import BaseDetector
+class BruteForceDetector(BaseDetector):
 
     def __init__(self, threshold=5):
 
-        self.threshold = threshold
+        super().__init__(threshold)
 
         self.failed_attempts = defaultdict(list)
-        self.alerted = set()
+        
     def analyze(self, event):
 
         if event is None:
@@ -25,32 +25,22 @@ class BruteForceDetector:
 
         self.failed_attempts[key].append(current_time)
         window = timedelta(seconds=60)
-        self.failed_attempts[key] = [t for t in self.failed_attempts[key] if current_time - t < window]
+        self.failed_attempts[key] = [t for t in self.failed_attempts[key] if current_time - t <= window]
 
-        count = len(self.failed_attempts[key])  
+        count = len(self.failed_attempts[key])
+
         if key in self.alerted:
             return None
+
         if count >= self.threshold:
-
             self.alerted.add(key)
-
-            return {
-
-                "attack": "Brute Force",
-
-                "severity": "High",
-
-                "timestamp": event["timestamp"],
-
-                "ip": event["ip"],
-
-                "user": event["user"],
-
-                "failed_attempts": count,
-
-                "recommendation":
-                    "Block source IP and investigate account."
-
-            }
+            return self.create_alert(
+                attack="Brute Force",
+                severity="High",
+                timestamp=event["timestamp"],
+                source_ip=event["ip"],
+                details=(f"{count} failed logins attempts" f"for user '{event['user']}'" f"from IP {event['ip']} within 1 minute."),
+                recommendation="Investigate repeated failed authentication attempts.",
+            )
 
         return None

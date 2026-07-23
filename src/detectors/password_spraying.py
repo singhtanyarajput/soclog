@@ -1,15 +1,13 @@
 from collections import defaultdict
+from detectors.base_detectors import BaseDetector
 
-
-class PasswordSprayDetector:
+class PasswordSprayDetector(BaseDetector):
 
     def __init__(self, threshold=5):
 
-        self.threshold = threshold
+        super().__init__(threshold)
 
         self.users_by_ip = defaultdict(set)
-
-        self.alerted = set()
 
     def analyze(self, event):
 
@@ -32,21 +30,20 @@ class PasswordSprayDetector:
 
             self.alerted.add(ip)
 
-            return {
+            return self.create_alert(
 
-                "attack": "Password Spraying",
+                attack="Password Spraying",
 
-                "severity": "High",
+                severity="High",
 
-                "timestamp": event["timestamp"],
+                timestamp=event["timestamp"],
 
-                "ip": ip,
+                source_ip=ip,
 
-                "users_targeted": len(self.users_by_ip[ip]),
+                details=f"{len(self.users_by_ip[ip])} different users targeted from the same IP.",
 
-                "recommendation":
-                    "Investigate repeated authentication attempts across multiple accounts."
+                recommendation="Investigate repeated authentication attempts across multiple accounts.",
 
-            }
+            )
 
         return None
