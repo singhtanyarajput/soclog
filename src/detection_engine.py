@@ -1,6 +1,6 @@
 from detectors.brute_force import BruteForceDetector
 from detectors.password_spraying import PasswordSprayDetector
-
+from detectors.credential_stuffing import CredentialStuffingDetector
 class DetectionEngine:
 
     def __init__(self):
@@ -8,8 +8,8 @@ class DetectionEngine:
         self.detectors = [
 
             BruteForceDetector(),
-            PasswordSprayDetector()
-
+            PasswordSprayDetector(),
+            CredentialStuffingDetector()
         ]
 
     def analyze(self, event):
