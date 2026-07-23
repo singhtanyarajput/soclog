@@ -1,5 +1,5 @@
 from collections import defaultdict
-
+from datetime import datetime, timedelta
 
 class BruteForceDetector:
 
@@ -7,7 +7,7 @@ class BruteForceDetector:
 
         self.threshold = threshold
 
-        self.failed_attempts = defaultdict(int)
+        self.failed_attempts = defaultdict(list)
         self.alerted = set()
     def analyze(self, event):
 
@@ -21,10 +21,13 @@ class BruteForceDetector:
             event["ip"],
             event["user"]
         )
+        current_time = datetime.strptime(event["timestamp"], "%Y-%m-%d %H:%M:%S")
 
-        self.failed_attempts[key] += 1
+        self.failed_attempts[key].append(current_time)
+        window = timedelta(seconds=60)
+        self.failed_attempts[key] = [t for t in self.failed_attempts[key] if current_time - t < window]
 
-        count = self.failed_attempts[key]
+        count = len(self.failed_attempts[key])  
         if key in self.alerted:
             return None
         if count >= self.threshold:
